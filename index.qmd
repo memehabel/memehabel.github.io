@@ -8,8 +8,10 @@ about:
   image-width: 17em
   links:
     - icon: linkedin
+      text: LinkedIn
       href: https://www.linkedin.com/in/memehabel
     - icon: envelope
+      text: Email
       href: mailto:memehabel@gmail.com
 ---
 
