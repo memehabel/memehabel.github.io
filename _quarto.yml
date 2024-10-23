@@ -3,18 +3,19 @@ project:
   output-dir: docs
 
 website:
-  title: "memehabel.github.io"
+  title: "Meme Habel"
   navbar:
     left:
       - href: index.qmd
-        text: Home
+        text: home
       - about.qmd
 
 format:
   html:
-    theme: cosmo
+    theme: lux
     css: styles.css
     toc: true
+    page-layout: full
 
 editor: visual
 
