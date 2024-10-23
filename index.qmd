@@ -1,11 +1,16 @@
 ---
-title: "memehabel.github.io"
+title: "Mary Elizabeth ('Meme') Habel"
+image: media/MemeHabel.JPG
+2toc: false
+about: 
+  template: jolla
+  image-shape: rounded
+  image-width: 17em
+  links:
+    - icon: linkedin
+      href: https://www.linkedin.com/in/memehabel
+    - icon: envelope
+      href: mailto:memehabel@gmail.com
 ---
 
-This is a Quarto website.
-
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
-
-```{r}
-1 + 1
-```
+Hello! My name is Mary Elizabeth Habel, but I go by Meme. After recently completing my Master's in Business Analytics, I am currently in the market for a job in the Data Analytics and/or Data Science spaces. The 'About' page includes a brief history of my academic and professional experiences, along with skills I have gained along the way. On the 'Projects' page, you can see some of my work.
