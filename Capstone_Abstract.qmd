@@ -1,0 +1,12 @@
+---
+title: "Abstract"
+title-block-banner: true
+---
+
+# Global Nutrition and Health: Analyzing the Relationship Between Diet Composition and Disease Prevalence
+
+This project explores the intricate link between dietary habits and health outcomes across different countries. Recognizing the cultural and environmental factors that shape nutrition, the study examines average macronutrient compositions and caloric intake, providing a comprehensive overview of global dietary patterns. Following this analysis, the prevalence of cardiovascular diseases, neoplasms, and chronic respiratory diseases — which are among the leading causes of death in the United States — is investigated. 
+
+  Utilizing advanced modeling techniques learned during my graduate studies, I developed cross-validated multiple linear regression and random forest models to identify significant predictor variables impacting disease prevalence. Additionally, the study incorporates lifestyle factors such as alcohol consumption and physical activity levels, offering valuable insights into the complex interactions influencing global health.
+
+  The findings aim to inform policymakers, health professionals, and the public, potentially guiding targeted strategies to improve global health through optimized dietary and lifestyle interventions.

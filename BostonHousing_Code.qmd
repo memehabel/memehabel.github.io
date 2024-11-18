@@ -1,0 +1,641 @@
+---
+title: 'Boston Housing Case Study'
+author: "Meme Habel"
+date: "2024-04-19"
+---
+
+# Individual Boston Housing Case Study {.tabset}
+
+```{r setup, include=FALSE}
+rm(list=ls())
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load Packages and Data
+### Load Packages
+
+```{r, warning=FALSE,message=FALSE}
+library(tidyverse)
+library(MASS)
+library(glmnet)
+library(plotmo)
+library(rpart)
+library(rpart.plot)
+library(boot)
+library(FNN)
+library(randomForest)
+library(mgcv)
+library(gbm)
+library(xgboost)
+library(nlme)
+library(neuralnet)
+library(knitr)
+```
+
+### Load Data
+
+For this case study, I will be using the Boston Housing Data found in the MASS package. The target variable is median value of owner-occupied homes in $1,000 ('medv'), which is continuous.  This is the same data we have been using for the entirety of the Data Mining I and II courses this semester.  
+
+```{r}
+data(Boston); #this data is in MASS package
+attach(Boston)
+```
+
+
+## Exploratory Data Analysis
+
+### Data Definitions
+
+  - crim: per capita crime rate by town 
+  - zn: proportion of residential land zoned for lots over 25,000 sq.ft.
+  - Indus: proportion of non-retail business acres per town 
+  - chas: Charles River dummy variable 
+      - 1 if tract bounds river
+      - 0 otherwise
+  - nox: nitrogen oxides concentration (parts per 10 million) 
+  - rm: average number of rooms per dwelling 
+  - age: proportion of owner-occupied units built prior to 1940 
+  - dis: weighted mean of distances to five Boston employment centres
+  - rad: index of accessibility to radial highways
+  - tax: full-value property-tax rate per $10,000
+  - ptratio: pupil-teacher ratio by town
+  - black : 1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town
+  - lstat : lower status of the population (percent)
+  - medv(Y): median value of owner-occupied homes in $1,000
+
+
+### Data Preview
+
+```{r}
+head(Boston)
+```
+
+### Dimensionality
+
+```{r}
+dim(Boston)
+```
+
+There are 506 rows of data and 14 columns, with each column representing a different variable. 
+
+### Data Structure
+
+```{r}
+str(Boston)
+```
+### Summary Statistics
+
+```{r}
+summary(Boston)
+```
+
+After looking at the data structure and summary statistics, I conclude that all feature variables are continuous with the exceptions of 'chas' and 'rad'.  The 'chas' variable is a binary categorical variable and 'rad' is a multi-level categorical variable.  However, dummy encoding is not required as the data for these variables are in integer form. 
+
+### Missing Values
+
+```{r}
+any(is.na(Boston))
+```
+
+There are no missing values for this data set.
+
+
+### Correlation
+
+```{r}
+# Correlation matrix
+cor_matrix <- cor(Boston)
+sort(abs(cor_matrix[,"medv"]), decreasing = TRUE)
+```
+
+
+``` {r}
+# Plot correlation
+library(corrplot)
+cor_plot <- corrplot(cor_matrix, method = "circle")
+cor_plot
+```
+
+### Distribution of Data ('medv')
+
+```{r}
+# Histogram
+hist(Boston$medv, main = "Distribution of Median Home Values (medv)", xlab = "medv")
+```
+
+From the histogram above, we can see the data roughly follows a normal distribution, with a positive skew.  The most common 'bin' of median home value is $200,000 to $250,000.
+
+### Boxplots of 'medv' vs. Categorical Variables
+
+#### 'chas'
+```{r}
+# Boxplot of 'medv' vs. 'chas'
+boxplot(medv ~ chas, data = Boston, main = "medv vs. chas", xlab = "chas (z = tract bounds river, 0 = otherwise)")
+```
+
+#### 'rad'
+```{r}
+# Boxplot of 'medv' vs. 'chas'
+boxplot(medv ~ as.factor(rad), data = Boston, main = "medv vs. rad", xlab = "rad (index of accessibility to radial highways)")
+```
+
+### Scatterplots of 'medv' vs. Continuous Variables
+```{r fig.width=15, fig.height=15}
+# Identify continuous variables
+continuous_vars <- c("crim", "zn", "indus", "nox", "rm", "age", "dis", "tax", "ptratio", "black", "lstat")
+
+# Create scatterplots for continuous variables
+par(mfrow = c(4,3))
+for (var in continuous_vars) {
+  plot(Boston[[var]], Boston$medv, xlab = var, ylab = "medv", main = paste("medv vs.", var))
+}
+```
+
+Above, there are some relationships that appear strong.  Particularly, the 'rm' and 'lstat' variables seem to have somewhat linear relationships with the 'medv' variable.  Here, 'rm' has a positive relationship and 'lstat' has a negative relationship with the target variable. 
+
+## Data Preparation
+
+### Training and Testing Data Split
+
+Below I will perform a 80%/20% training and testing data split using my UC M# (12470675) as the seed for reproducibility. 
+
+```{r}
+set.seed(12470675)
+
+sample_index <- sample(nrow(Boston),nrow(Boston)*0.80)
+Boston_train <- Boston[sample_index,]
+Boston_test <- Boston[-sample_index,]
+
+n <- dim(Boston_train)[1] # sample size
+p <- dim(Boston)[2]-1 # number of predictors excluding column of ones
+```
+
+## Model Creation and Evaluation {.tabset}
+
+
+### 1. Linear Model
+
+
+#### Full Linear Model
+
+##### Model Creation
+```{r}
+# Full Model
+Boston.full.lm <- lm(medv ~ ., data = Boston_train)
+summary(Boston.full.lm)
+```
+
+##### Model Evaluation
+```{r}
+# in-sample fit (prediction), full data available #
+ASE_full_linear <- mean(Boston.full.lm$residuals^2)
+
+# out-of-sample fit (prediction) MSPE for full LM model #
+pred_full_linear_test <- predict(Boston.full.lm, Boston_test)
+MSPE_full_linear <- mean((Boston_test$medv - pred_full_linear_test)^2)
+```
+
+**Full Linear Model Results:**
+
+  - ASE: `r ASE_full_linear`
+  - MSPE: `r MSPE_full_linear`
+
+
+#### Stepwise Variable Selection with AIC
+
+##### Model Creation
+```{r}
+lm_model_null <- lm(medv ~ 1, data = Boston_train)
+model_step_aic <- step(
+   lm_model_null,
+   scope = list(lower = lm_model_null, upper = Boston.full.lm),
+   k = 2,
+   direction = "both")
+model_step_aic
+
+summary(model_step_aic)
+```
+
+##### Model Evaluation
+```{r}
+# in-sample fit (prediction)
+ASE_step_AIC <- mean(model_step_aic$residuals^2)
+
+# out-of-sample fit (prediction) MSPE for full LM model #
+pred_step_AIC <- predict(model_step_aic, Boston_test)
+MSPE_step_AIC <- mean((Boston_test$medv - pred_step_AIC)^2)
+```
+
+**Stepwise Variable Selection with AIC Model Results:**
+
+  - ASE: `r ASE_step_AIC`
+  - MSPE: `r MSPE_step_AIC`
+
+
+
+
+### 2. Regression Tree
+
+#### Original Regression Tree
+##### Model Creation
+```{r}
+boston_rpart <- rpart(formula = medv ~ ., data = Boston_train)
+boston_rpart
+```
+
+```{r}
+ prp(boston_rpart,digits = 4, extra = 1)
+```
+
+##### Model Evaluation
+```{r}
+#in-sample prediction
+boston_train_pred_tree = predict(boston_rpart, Boston_train)
+
+#calculate the squared residuals
+sq_residuals_tree <- (Boston_train$medv - boston_train_pred_tree)^2
+
+#calculate ASE
+ASE_regression_tree <- mean(sq_residuals_tree)
+
+#out-of-sample prediction 
+boston_test_pred_tree = predict(boston_rpart,Boston_test)
+MSPE_regression_tree <- mean((Boston_test$medv - boston_test_pred_tree)^2)
+
+```
+
+
+**Original Regression Tree Results:**
+
+  - ASE: `r ASE_regression_tree`
+  - MSPE: `r MSPE_regression_tree`
+
+
+#### Pruned Regression Tree
+##### Model Creation
+```{r}
+boston_largetree <- rpart(formula = medv ~ ., data = Boston_train, cp = 0.001)
+
+plotcp(boston_largetree)
+printcp(boston_largetree)
+```
+
+```{r}
+boston_rpart_prune = prune(boston_largetree, cp = 0.0080935)
+```
+
+
+##### Model Evaluation
+```{r}
+#in-sample prediction
+boston_train_pred_tree_prune = predict(boston_rpart_prune, Boston_train)
+
+#calculate the squared residuals
+sq_residuals_tree_prune <- (Boston_train$medv - boston_train_pred_tree_prune)^2
+
+#calculate ASE
+ASE_regression_tree_prune <- mean(sq_residuals_tree_prune)
+
+#out-of-sample prediction 
+boston_test_pred_tree_prune = predict(boston_rpart_prune,Boston_test)
+MSPE_regression_tree_prune <- mean((Boston_test$medv - boston_test_pred_tree_prune)^2)
+```
+
+
+**Pruned Regression Tree Results:**
+
+  - ASE: `r ASE_regression_tree_prune`
+  - MSPE: `r MSPE_regression_tree_prune`
+
+
+### 3. k-NN with optimal k 
+#### k-NN with optimal k *(scaled X)*
+##### Normalization
+```{r}
+train.norm <- Boston_train
+test.norm <- Boston_test
+
+## normalize numerical predictors to 0-1 scale
+## for testing and training dataset 
+## range [0,1]-standardization ##
+cols <- colnames(train.norm[, -14]) #scaling only on p=13 predictors X
+for (j in cols) {
+  train.norm[[j]] <- (train.norm[[j]] - min(Boston_train[[j]])) / (max(Boston_train[[j]]) - min(Boston_train[[j]]))
+  test.norm[[j]] <- (test.norm[[j]] - min(Boston_train[[j]])) / (max(Boston_train[[j]]) - min(Boston_train[[j]]))
+}
+```
+
+
+##### Select the Best k
+```{r}
+set.seed(12470675)
+sample_index2 <- sample(nrow(Boston_train),nrow(Boston_train)*0.80)
+train2.norm <- train.norm[sample_index2,]
+valid.norm <- train.norm[-sample_index2,]
+
+# initialize a data frame with two columns: k and accuracy
+RMSE.df <- data.frame(k = seq(1, 30, 1), RMSE.k = rep(0, 30))
+
+# compute knn for different k on validation set
+for (i in 1:30) {
+  knn.reg.pred <- knn.reg(train = train2.norm[, c(1:13)], test = valid.norm[, c(1:13)], 
+                          y = train2.norm$medv, k = i)
+  RMSE.df[i, 2] <- sqrt(sum((valid.norm$medv-knn.reg.pred$pred)^2)/length(valid.norm$medv))
+}
+RMSE.df
+k <- which(RMSE.df[,2] == min(RMSE.df[,2]))
+k
+```
+I will now proceed with knn using k=3.
+
+##### Model Creation
+```{r}
+Boston.knn.train.best.k <- knn.reg(train = train.norm[, 1:13],
+                            test = train.norm[, 1:13],
+                            y = train.norm$medv,
+                            k = k)
+Boston.knn.best.k <- data.frame(cbind(pred = Boston.knn.train.best.k$pred, actual=train.norm$medv))
+```
+
+##### Model Evaluation
+```{r}
+#calculate in-sample ASE 
+ASE_knn_best_k <- sum((Boston_train$medv-Boston.knn.best.k$pred)^2)/length(Boston_train$medv)
+
+
+# Out-of-Sample Testing
+Boston.knn.reg <- knn.reg(train = train.norm[, 1:13], 
+                          test = test.norm[, 1:13], 
+                          y = train.norm$medv, 
+                          k = k)
+
+Boston.knn.results <- data.frame(cbind(pred = Boston.knn.reg$pred, actual = Boston_test$medv))
+
+# calculate MSPE (root mean (average) sum squared prediction errors)
+MSPE_knn_best_k <- sum((Boston_test$medv-Boston.knn.results$pred)^2)/length(Boston_test$medv)
+```
+
+**k-NN Model Results:**
+
+  - ASE: `r ASE_knn_best_k`
+  - MSPE: `r MSPE_knn_best_k`
+
+
+### 4. Random Forests
+#### Random Forests
+##### Model Creation
+```{r}
+Boston_rf <- randomForest(medv~., 
+                          data = Boston_train, importance = TRUE)
+summary(Boston_rf)
+```
+
+##### Model Evaluation
+```{r}
+# prediction on training sample
+Boston_rf_pred_train <- predict(Boston_rf, Boston_train)
+# in-sample ASE
+ASE_random_forest <- mean((Boston_train$medv-Boston_rf_pred_train)^2) 
+
+# plot out of bag (OOB) errors for each ntree value from 1 to 500
+plot(Boston_rf$mse, type='l', col=2, lwd=2, xlab = "ntree", ylab = "OOB Error")
+
+# prediction on testing sample
+Boston_rf_pred_test <- predict(Boston_rf, Boston_test)
+# out-of-sample MSPE
+MSPE_random_forest <- mean((Boston_test$medv-Boston_rf_pred_test)^2) 
+```
+
+**Random Forest Model Results:**
+
+  - ASE: `r ASE_random_forest`
+  - MSPE: `r MSPE_random_forest`
+  
+  
+```{r}
+# make dataframe from importance() output
+feat_imp_df <- importance(Boston_rf) %>% 
+  data.frame() %>% 
+  mutate(feature = row.names(.)) 
+feat_imp_df
+```
+
+```{r}
+  # plot dataframe
+ggplot(feat_imp_df, aes(x = reorder(feature, X.IncMSE), 
+                         y = X.IncMSE)) +
+    geom_bar(stat='identity') +
+    coord_flip() +
+    theme_classic() +
+    labs(
+      x     = "Feature",
+      y     = "Importance",
+      title = "Feature Importance: Random Forest Model"
+    )
+```
+
+
+### 5. Boosting
+#### Boosting
+##### Model Creation
+```{r}
+Boston_boost <- gbm(formula = medv~., 
+                    data = Boston_train, 
+                    distribution = "gaussian", n.trees=500)
+summary(Boston_boost)
+```
+
+##### Model Evaluation
+```{r}
+# in-sample prediction
+Boston_boost_pred_train<- predict(Boston_boost, Boston_train, n.trees=500) 
+# in-sample ASE
+ASE_boosting <- mean((Boston_train$medv-Boston_boost_pred_train)^2) 
+
+# out-of-sample prediction 
+Boston_boost_pred_test<- predict(Boston_boost, Boston_test, n.trees=500)
+# out-of-sample MSPE
+MSPE_boosting <- mean((Boston_test$medv-Boston_boost_pred_test)^2) 
+```
+
+
+**Boosting Model Results:**
+
+  - ASE: `r ASE_boosting`
+  - MSPE: `r MSPE_boosting`
+
+### 6. GAM
+#### Generalized Additive Model (GAM)
+##### Model Creation
+```{r}
+Boston_gam <- gam(medv ~ s(crim)+s(zn)+s(indus)+chas+s(nox)
+                  +s(rm)+s(age)+s(dis)+rad+s(tax)+s(ptratio)
+                  +s(black)+s(lstat),data=Boston_train)
+summary(Boston_gam)
+```
+
+```{r}
+plot(Boston_gam, shade=TRUE, seWithMean=TRUE, scale=0, pages=1)
+```
+###### Refit GAM Model 
+```{r}
+#refit  gam on Boston training (nonlinear to linear)
+
+Boston_gam_re <- gam(medv ~ s(crim)+zn+s(indus)+chas+s(nox)
+                     +s(rm)+age+s(dis)+rad+s(tax)+ptratio
+                     +s(black)+s(lstat),data=Boston_train)
+summary(Boston_gam_re)
+```
+
+```{r}
+plot(Boston_gam_re, shade=TRUE, seWithMean=TRUE, scale=0, pages=1)
+```
+
+###### Refit GAM Model and Remove Insignificant Variables
+```{r}
+#refit  gam on Boston training (remove nonsignificant variables)
+
+Boston_gam_final <- gam(medv ~ s(crim)+s(indus)+s(nox)
+                        +s(rm)+s(dis)+rad+s(tax)+ptratio
+                        +s(lstat),data=Boston_train)
+summary(Boston_gam_final)
+```
+
+```{r}
+plot(Boston_gam_final, shade=TRUE, seWithMean=TRUE, scale=0, pages=1)
+```
+
+
+##### Model Evaluation
+```{r}
+# in-sample ASE
+ASE_gam.orig <- Boston_gam$dev/nrow(Boston_train) #original model
+ASE_gam.re <- Boston_gam_re$dev/nrow(Boston_train) #adjusted model
+ASE_gam.final <- Boston_gam_final$dev/nrow(Boston_train) #final model
+
+#out of sample MSPE
+pred_gam_orig_test <- predict(Boston_gam,Boston_test)#final model
+MSPE_gam.orig <- mean((pred_gam_orig_test - Boston_test$medv)^2)
+
+pred_gam_re_test <- predict(Boston_gam_re, Boston_test)#final model
+MSPE_gam.re <- mean((pred_gam_re_test - Boston_test$medv)^2)
+
+pred_gam_final_test <- predict(Boston_gam_final,Boston_test)
+MSPE_gam.final <- mean((pred_gam_final_test - Boston_test$medv)^2)
+```
+
+**GAM Model Results:**
+
+**Original GAM Model**
+
+  - ASE: `r ASE_gam.orig`
+  - MSPE: `r MSPE_gam.orig`
+  
+**Adjusted GAM Model (nonlinear to linear)**
+
+  - ASE: `r ASE_gam.re`
+  - MSPE: `r MSPE_gam.re`
+  
+**Final GAM Model (remove insignificant variables)**
+
+  - ASE: `r ASE_gam.final`
+  - MSPE: `r MSPE_gam.final`
+  
+
+### 7. Neural Networks 
+#### Neural Networks *(scaled X&Y)*
+##### Scale X and Y
+```{r}
+## initialize scaling training, testing, and new data frames to originals ##
+train.norm <- Boston_train
+test.norm <- Boston_test
+
+
+## normalize all numerical variables (X&Y) to 0-1 scale, range [0,1]-standardization ##
+cols <- colnames(train.norm[, ]) #scaling both X and Y
+for (j in cols) {
+  train.norm[[j]] <- (train.norm[[j]] - min(Boston_train[[j]])) / (max(Boston_train[[j]]) - min(Boston_train[[j]]))
+  test.norm[[j]] <- (test.norm[[j]] - min(Boston_train[[j]])) / (max(Boston_train[[j]]) - min(Boston_train[[j]]))
+}
+```
+
+
+##### Model Creation
+```{r}
+#### Neural networks on (scaled) Training data and plot ####
+set.seed(12470675)
+f <- as.formula("medv ~ .")
+Boston_nn_scaled <- neuralnet(f,data=train.norm, hidden=c(5,3), linear.output=T)
+plot(Boston_nn_scaled)
+```
+
+
+
+##### Model Evaluation
+```{r}
+# in-sample prediction
+pr_nn_scaled_train <- compute(Boston_nn_scaled, train.norm[,1:p])
+
+# recover predicted value back to the original response scale 
+pr_nn_org <- pr_nn_scaled_train$net.result*(max(Boston_train$medv)-min(Boston_train$medv))+min(Boston_train$medv)
+train_r <- (train.norm$medv)*(max(Boston_train$medv)-min(Boston_train$medv))+min(Boston_train$medv)
+
+# in-sample ASE
+ASE_nn.norm <- mean((train_r - pr_nn_org)^2) 
+
+# out-of-sample prediction
+pr_nn_scaled_test <- compute(Boston_nn_scaled, test.norm[,1:p])
+
+# recover predicted value back to the original response scale 
+pr_nn_org_t <- pr_nn_scaled_test$net.result*(max(Boston_train$medv)-min(Boston_train$medv))+min(Boston_train$medv)
+test_r <- (test.norm$medv)*(max(Boston_train$medv)-min(Boston_train$medv))+min(Boston_train$medv)
+
+# out-of-sample MSPE
+MSPE_nn.norm <- mean((test_r - pr_nn_org_t)^2)
+```
+
+**Neural Network Model Results:**
+
+  - ASE: `r ASE_nn.norm`
+  - MSPE: `r MSPE_nn.norm`
+
+## Summary of Model Results
+
+```{r}
+# create list of models created
+models <- c("Full Linear Regression", 
+            "Stepwise Variable Selection LM with AIC",
+            "Original Regression Tree", 
+            "Pruned Regression Tree",
+            "k-NN with optimal k (scaled X)",
+            "Random Forests",
+            "Boosting",
+            "Original Generalized Additive Model (GAM)",
+            "Adjusted Generalized Additive Model (GAM)",
+            "Final Generalized Additive Model (GAM)",
+            "Neural Networks (scaled X&Y)")
+
+
+
+ASE_values <- c(ASE_full_linear, ASE_step_AIC, ASE_regression_tree, 
+                ASE_regression_tree_prune, ASE_knn_best_k,
+                ASE_random_forest, ASE_boosting,
+                ASE_gam.orig, ASE_gam.re, ASE_gam.final,
+                ASE_nn.norm)
+
+
+MSPE_values <- c(MSPE_full_linear, MSPE_step_AIC, MSPE_regression_tree, 
+                 MSPE_regression_tree_prune, MSPE_knn_best_k,
+                 MSPE_random_forest, MSPE_boosting,
+                 MSPE_gam.orig, MSPE_gam.re, MSPE_gam.final,
+                 MSPE_nn.norm)
+
+# create dataframe
+model_results <- data.frame(Method = models, ASE = ASE_values, MSPE = MSPE_values)
+kable(model_results)
+```
+
+From the evaluation metrics summarized above, it is clear that the Random Forests model performs the best.  The ASE and MSPE for this model are significantly lower than those for all of the other models.  The Neural Networks model also performs well.  Conversely, the Full Linear Regression model performs the worst.  However, I do believe that it likely makes the most sense to use the linear regression model for this data and the potential uses of the analysis.  
+
+Finally, based on feature importance from the Random Forest model, as well as the regression coefficients from the Stepwise Variable Selection Linear Regression Model with AIC, I conclude that the most influential features are 'lstat', 'nox', and 'rm'. 
+

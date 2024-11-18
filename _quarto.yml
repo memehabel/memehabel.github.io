@@ -5,12 +5,32 @@ project:
 website:
   title: "Meme Habel"
   navbar:
+    search: true
     left:
       - href: index.qmd
         text: home
       - about.qmd
-      - projects.qmd
+      - sidebar:tableau
+      - sidebar:R
 
+  sidebar: 
+    - id: tableau
+      title: "Tableau"
+      contents: 
+        - section: "Makeover Monday: AirHelp Scores" 
+          contents: 
+            - AirHelp_Scores.qmd
+      
+    - id: R
+      title: "R"
+      contents: 
+        - section: "Global Nutrition and Health"
+          contents:
+            - Capstone_Abstract.qmd
+            - Capstone_Code.qmd
+        - section: "Boston Housing Analysis"
+          contents: 
+            - BostonHousing_Code.qmd
 format:
   html:
     theme: lux
