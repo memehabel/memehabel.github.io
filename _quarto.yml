@@ -31,6 +31,7 @@ website:
         - section: "Boston Housing Analysis"
           contents: 
             - BostonHousing_Code.qmd
+            - BostonHousing_Presentation.qmd
 format:
   html:
     theme: lux

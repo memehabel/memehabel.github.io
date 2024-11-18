@@ -1,0 +1,22 @@
+---
+title: "Presentation"
+author: "Meme Habel"
+date: "2024-04-19"
+output: html_document
+---
+```{=html}
+<style>
+  #myid {
+    border: 10px solid rgba(200,0,0,.2);
+    margin: 0;
+  }
+  .myclass {
+    max-width: 100%;
+    width: 800px;
+    height: 600px;
+  }
+</style>
+```
+![](BostonHousing_Presentation.pdf){#myid .myclass}
+
+

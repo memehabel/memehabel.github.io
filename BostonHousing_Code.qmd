@@ -1,5 +1,5 @@
 ---
-title: 'Boston Housing Case Study'
+title: 'Code File'
 author: "Meme Habel"
 date: "2024-04-19"
 ---
@@ -113,7 +113,6 @@ sort(abs(cor_matrix[,"medv"]), decreasing = TRUE)
 # Plot correlation
 library(corrplot)
 cor_plot <- corrplot(cor_matrix, method = "circle")
-cor_plot
 ```
 
 ### Distribution of Data ('medv')
