@@ -19,7 +19,7 @@ website:
       contents: 
         - section: "Makeover Monday: AirHelp Scores" 
           contents: 
-            - AirHelp_Abstract
+            - AirHelp_Abstract.qmd
             - AirHelp_Scores.qmd
       
     - id: R
