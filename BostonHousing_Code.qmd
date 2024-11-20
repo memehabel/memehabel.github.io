@@ -1,5 +1,9 @@
 ---
 title: 'Code File'
+format:
+  html:
+    code-fold: true
+    code-summary: "Show Code"
 author: "Meme Habel"
 date: "2024-04-19"
 ---
@@ -30,6 +34,7 @@ library(xgboost)
 library(nlme)
 library(neuralnet)
 library(knitr)
+library(corrplot)
 ```
 
 ### Load Data
@@ -111,7 +116,6 @@ sort(abs(cor_matrix[,"medv"]), decreasing = TRUE)
 
 ``` {r}
 # Plot correlation
-library(corrplot)
 cor_plot <- corrplot(cor_matrix, method = "circle")
 ```
 
@@ -569,7 +573,6 @@ plot(Boston_nn_scaled)
 ```
 
 
-
 ##### Model Evaluation
 ```{r}
 # in-sample prediction
@@ -636,5 +639,5 @@ kable(model_results)
 
 From the evaluation metrics summarized above, it is clear that the Random Forests model performs the best.  The ASE and MSPE for this model are significantly lower than those for all of the other models.  The Neural Networks model also performs well.  Conversely, the Full Linear Regression model performs the worst.  However, I do believe that it likely makes the most sense to use the linear regression model for this data and the potential uses of the analysis.  
 
-Finally, based on feature importance from the Random Forest model, as well as the regression coefficients from the Stepwise Variable Selection Linear Regression Model with AIC, I conclude that the most influential features are 'lstat', 'nox', and 'rm'. 
+Finally, based on feature importance from the Random Forest model, as well as the regression coefficients from the Stepwise Variable Selection Linear Regression Model with AIC, I conclude that the most influential features are 'rm', 'lstat', and 'dis'. 
 

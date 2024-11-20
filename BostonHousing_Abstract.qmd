@@ -1,0 +1,10 @@
+---
+title: "Abstract"
+title-block-banner: true
+---
+
+# Boston Housing Data Case Study
+
+In this project, I utilize the Boston dataset from the MASS package in R.  This data contains information on residential properties within various Boston suburbs.  Ultimately, the goal of this case study is to determine which characteristics of a town best predict the median value of owner-occupied homes in that town. 
+
+After applying numerous different modeling techniques to the data, I found the Random Forests model performed the best based on my evaluation metrics.  Additionally, this model indicated that the average number of rooms per dwelling is the most important feature variable when predicting the median home value.  The lower status of the population (percent) and weighted mean of distances to five Boston employment centres were also notably important in the modeling.
