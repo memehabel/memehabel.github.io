@@ -3,7 +3,7 @@ title: 'Dashboard'
 format: html
 ---
 
-## Embedded Tableau Dashboard
+## Tableau Dashboard
 
 
 
