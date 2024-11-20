@@ -13,9 +13,6 @@ about:
     - icon: envelope
       text: Email
       href: mailto:memehabel@gmail.com
-format:
-  html:
-    fontsize: 1.5em
 ---
 
 &nbsp;
