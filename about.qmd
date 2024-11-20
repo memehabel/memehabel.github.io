@@ -1,21 +1,28 @@
 ---
 title: 'about'
 title-block-banner: true
+format:
+    html:
+      toc: true
+      toc-depth: 4
+callout-appearance: minimal
 ---
 
 ### Education
 
 #### Graduate
 
--   Master of Science in Business Analytics (MS)
+##### - Master of Science in Business Analytics (MS)
 
-    -   Relevant Coursework: Data Wrangling, Optimization, Data Mining, Simulation Modeling & Methods, Probability Models, Statistical Computing, Applied Statistical Methods, Applied Linear Regression, Data Management, Data Visualization, Survey of Machine Learning & Artificial Intelligence, and Forecasting Methods
+  -   *Relevant Coursework:*
+      -   Data Wrangling, Optimization, Data Mining, Simulation Modeling & Methods, Probability Models, Statistical Computing, Applied Statistical Methods, Applied Linear Regression, Data Management, Data Visualization, Survey of Machine Learning & Artificial Intelligence, and Forecasting Methods
 
 #### Undergraduate
 
--   Bachelor of Science in Business Analytics (BS)
+##### - Bachelor of Science in Business Analytics (BS)
 
--   Bachelor of Scinece in Industrial Management (BSIM)
+##### - Bachelor of Scinece in Industrial Management (BSIM)
+
 
 ### Work Experience
 
@@ -23,47 +30,53 @@ title-block-banner: true
 
 #### Pratt & Whitney: Global Supply Chain
 
--   Center of Excellence Intern
+##### - Center of Excellence Intern
 
-    -   Automated supplier chargeback process for late deliveries and quality issues based on Long Term Agreement (LTA) terms via a live dashboard which pulls in data from over 30 sources on a daily basis.
+  - Automated supplier chargeback process for late deliveries and quality issues based on Long Term Agreement (LTA) terms via a live dashboard which pulls in data from over 30 sources on a daily basis.
 
-    -   Learned Master Data protocols, completed SAP Bootcamp, and self-taught SQL/QlikSense Development.
+  - Learned Master Data protocols, completed SAP Bootcamp, and self-taught SQL/QlikSense Development.
 
-    -   Tools utilized: SQL, QlikSense Development, Microsoft Excel, VBA, Confluence, SAP
+  - *Tools utilized:* 
+    - SQL, QlikSense, Microsoft Excel, VBA, Confluence, SAP
 
--   Product Procurement Intern
+##### - Product Procurement Intern
 
-    -   Developed and deployed live automated line of balance system utilizing bill of materials, blueprints, lead times, and supplier commitments.
+<div class="custom-spacing">
 
-    -   Led brainstorming, process mapping, and testing sessions with cross-functional teams.
+  - Developed and deployed live automated line of balance system utilizing bill of materials, blueprints, lead times, and supplier commitments.
 
-    -   Tools utilized: SQL, Oracle, SAP, QlikSense Development, Metric Insights, Microsoft Project, Microsoft Visio, Microsoft Excel, VBA
+  - Led brainstorming, process mapping, and testing sessions with cross-functional teams.
 
--   Indirect Procurement Analyst
+  - *Tools utilized:* 
+    - SQL, DBeaver, SAP, QlikSense, Metric Insights, Microsoft Project, Microsoft Visio, Microsoft Excel, VBA
 
-    -   Managed SAP Ariba system rollout to suppliers and led demonstrations.
+</div>
 
-    -   Remidiated invoice discrepencies with in-depth analyses.
+##### - Indirect Procurement Analyst
 
-    -   Analyzed Master Service Agreement (MSA) data and related invoices for sourcing team to identify trends in spending by category.
+  - Managed SAP Ariba system rollout to suppliers and led demonstrations.
 
-    -   Tools utilized: SAP Ariba, SAP, RStudio, Microsoft Excel, VBA, QlikSense
+  - Remidiated invoice discrepencies with in-depth analyses.
+
+  - Analyzed Master Service Agreement (MSA) data and related invoices for sourcing team to identify trends in spending by category.
+
+  - *Tools utilized:* 
+    - SAP Ariba, SAP, RStudio, Microsoft Excel, VBA, QlikSense
 
 ### Skills
+
+::: {.panel-tabset}
 
 #### Technical Skills:
 
 -   R/Rstudio
-
 -   Python
-
 -   Tableau
-
 -   QlikSense
 
 -   SQL
 
--   Oracle Databases
+-   GitHub
 
 -   Databricks
 
@@ -74,6 +87,10 @@ title-block-banner: true
 -   MATLAB
 
 -   LabVIEW
+
+-   MySQL Workbench
+
+-   Metric Insights
 
 -   Microsoft
 
@@ -145,12 +162,14 @@ title-block-banner: true
 
 -   Project Management
 
--   Cross-functional collaboration
+-   Cross-Functional Collaboration
 
 -   Leadership
 
--   Process mapping
+-   Process Mapping
 
--   Continuous improvement
+-   Continuous Improvement
 
--   Supplier relationship management
+-   Supplier Relationship Management
+
+:::

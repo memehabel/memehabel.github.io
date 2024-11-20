@@ -1,11 +1,11 @@
 ---
-title: "Mary Elizabeth ('Meme') Habel"
+title: "Meme Habel"
 image: media/MemeHabel.JPG
 2toc: false
 about: 
-  template: jolla
+  template: trestles
   image-shape: rounded
-  image-width: 17em
+  image-width: 12em
   links:
     - icon: linkedin
       text: LinkedIn
@@ -13,6 +13,12 @@ about:
     - icon: envelope
       text: Email
       href: mailto:memehabel@gmail.com
+format:
+  html:
+    fontsize: 1.5em
 ---
 
-Hello! My name is Mary Elizabeth Habel, but I go by Meme. After recently completing my Master's in Business Analytics, I am currently in the market for a job in the Data Analytics and/or Data Science spaces. The 'About' page includes a brief history of my academic and professional experiences, along with skills I have gained along the way. On the 'Projects' page, you can see some of my work.
+&nbsp;
+
+
+Hello! My name is Mary Elizabeth Habel, but I go by Meme. After recently completing my Master's in Business Analytics, I am currently in the market for a job in the Data Analytics and/or Data Science spaces. The [ABOUT](about.qmd) page includes a brief history of my academic and professional experiences, along with skills I have gained along the way. Within the other sections of this site, you can see some of my work.

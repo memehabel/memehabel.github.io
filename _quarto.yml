@@ -19,6 +19,7 @@ website:
       contents: 
         - section: "Makeover Monday: AirHelp Scores" 
           contents: 
+            - AirHelp_Abstract
             - AirHelp_Scores.qmd
       
     - id: R
@@ -30,6 +31,7 @@ website:
             - Capstone_Code.qmd
         - section: "Boston Housing Analysis"
           contents: 
+            - BostonHousing_Abstract.qmd
             - BostonHousing_Code.qmd
             - BostonHousing_Presentation.qmd
 format:
