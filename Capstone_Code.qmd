@@ -2,7 +2,10 @@
 title: "Code File"
 author: "Meme Habel"
 date: "2024-07-12"
-output: html_document
+format:
+  html:
+    code-fold: true
+    code-summary: "Show Code"
 ---
 
 ```{r setup, include=FALSE}
