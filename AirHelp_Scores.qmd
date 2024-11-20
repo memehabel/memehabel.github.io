@@ -1,5 +1,5 @@
 ---
-title: 'Tableau'
+title: 'Dashboard'
 format: html
 ---
 

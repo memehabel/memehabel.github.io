@@ -1,0 +1,10 @@
+---
+title: "Abstract"
+title-block-banner: true
+---
+
+# Makeover Monday: AirHelp Scores
+
+Makeover Monday is a global project for data analysts to come together and share improved visualizations for existing information.  Each week, a different article or publication containing data visualization is addressed.
+
+Eager to participate in this movement, I created an improved dashboard for the 2023 AirHelp Score airport rankings published by [AirHelp](https://www.airhelp.com/en-gb/airhelp-score/).
